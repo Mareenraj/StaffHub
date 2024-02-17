@@ -1,11 +1,13 @@
-import './App.css'
+import "./App.css";
+import ListEmployeeComponent from "./components/ListEmployeeComponent";
 
 function App() {
+ 
   return (
     <>
-      <h1 className='text-3xl font-bold'>Employee Management System</h1>
+      <ListEmployeeComponent />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
