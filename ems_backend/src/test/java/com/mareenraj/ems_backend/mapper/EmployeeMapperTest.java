@@ -39,7 +39,7 @@ class EmployeeMapperTest {
     @Test
     void shouldThrowExceptionIfEmployeeDtoIsNull() {
         var exp = Assertions.assertThrows(NullPointerException.class, () -> {
-            EmployeeMapper.mapToEmployee(null);
+            employeeMapper.mapToEmployee(null);
         });
         assertEquals("EmployeeDto cannot be null", exp.getMessage());
     }
@@ -47,7 +47,7 @@ class EmployeeMapperTest {
     @Test
     void shouldThrowExceptionIfEmployeeIsNull() {
         var exp = Assertions.assertThrows(NullPointerException.class, () -> {
-            EmployeeMapper.mapToEmployeeDto(null);
+            employeeMapper.mapToEmployeeDto(null);
         });
         assertEquals("Employee cannot be null", exp.getMessage());
     }
