@@ -5,6 +5,9 @@ import com.mareenraj.ems_backend.model.Employee;
 
 public class EmployeeMapper {
     public static EmployeeDto mapToEmployeeDto(Employee employee){
+        if (employee == null) {
+            throw new NullPointerException("Employee cannot be null");
+        }
         return new EmployeeDto(
                 employee.getId(),
                 employee.getFirstName(),
@@ -14,6 +17,9 @@ public class EmployeeMapper {
     }
 
     public static Employee mapToEmployee(EmployeeDto employeeDto){
+        if (employeeDto == null) {
+            throw new NullPointerException("EmployeeDto cannot be null");
+        }
         return new Employee(
                 employeeDto.getId(),
                 employeeDto.getFirstName(),
