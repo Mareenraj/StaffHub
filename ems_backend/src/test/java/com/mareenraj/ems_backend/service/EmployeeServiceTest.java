@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -25,6 +26,7 @@ class EmployeeServiceTest {
     private EmployeeRepository employeeRepository;
     @Mock
     private EmployeeMapper employeeMapper;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -57,6 +59,30 @@ class EmployeeServiceTest {
 
     @Test
     void getEmployeeById() {
+        //given
+        Long employeeId = 345L;
+        Employee employee = new Employee(
+                345L,
+                "John",
+                "Doe",
+                "jdoe@me.com"
+        );
+
+        //Mock the calls
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(employeeMapper.mapToEmployeeDto(any(Employee.class))).thenReturn(new EmployeeDto(
+                345L, "John", "Doe", "jdoe@me.com"
+        ));
+
+        //when
+        EmployeeDto employeeDto = employeeService.getEmployeeById(employeeId);
+
+        //then
+        assertEquals(employee.getFirstName(), employeeDto.getFirstName());
+        assertEquals(employee.getLastName(), employeeDto.getLastName());
+        assertEquals(employee.getEmail(),employeeDto.getEmail());
+
+        verify(employeeRepository,times(1)).findById(employeeId);
     }
 
     @Test
@@ -81,10 +107,49 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void updateEmployee() {
+    public void testUpdateEmployee() {
+        // Given
+        Long employeeId = 345L;
+        EmployeeDto updatedEmployeeDto = new EmployeeDto(employeeId, "John", "Doe", "jdoe@me.com");
+        Employee existingEmployee = new Employee(employeeId, "Jane", "Doe", "janedoe@me.com");
+
+        // Mock repository behavior
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(employeeMapper.mapToEmployeeDto(any(Employee.class))).thenAnswer(invocation -> {
+            Employee employee = invocation.getArgument(0);
+            return new EmployeeDto(employee.getId(), employee.getFirstName(), employee.getLastName(), employee.getEmail());
+        });
+
+        // When
+        EmployeeDto updatedEmployee = employeeService.updateEmployee(employeeId, updatedEmployeeDto);
+
+        // Then
+        assertEquals(updatedEmployeeDto.getFirstName(), updatedEmployee.getFirstName());
+        assertEquals(updatedEmployeeDto.getLastName(), updatedEmployee.getLastName());
+        assertEquals(updatedEmployeeDto.getEmail(), updatedEmployee.getEmail());
+
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(employeeRepository, times(1)).save(any(Employee.class));
+        verify(employeeMapper, times(1)).mapToEmployeeDto(any(Employee.class));
     }
 
     @Test
-    void deleteEmployee() {
+    public void testDeleteEmployee() {
+        // given
+        Long employeeId = 456L;
+
+        // mock calls
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(new Employee()));
+
+        // when
+        employeeService.deleteEmployee(employeeId);
+
+        // then
+        // No assertions needed as the method doesn't return a value
+
+        // verify interactions
+        verify(employeeRepository, times(1)).findById(employeeId);
+        verify(employeeRepository, times(1)).deleteById(employeeId);
     }
 }
