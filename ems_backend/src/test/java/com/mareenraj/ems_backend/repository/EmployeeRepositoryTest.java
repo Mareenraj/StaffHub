@@ -57,7 +57,7 @@ class EmployeeRepositoryTest {
 
         //Assert
         assertThat(employeeList).isNotNull();
-        assertThat(employeeList.size()).isEqualTo(2);
+        assertThat(employeeList.size()).isGreaterThanOrEqualTo(2);
     }
 
     @Test

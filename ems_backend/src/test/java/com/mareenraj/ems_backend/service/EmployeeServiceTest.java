@@ -9,14 +9,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 class EmployeeServiceTest {
@@ -34,32 +36,30 @@ class EmployeeServiceTest {
 
     @Test
     void createEmployee() {
-        //given
+        //Arrange
         EmployeeDto employeeDto = new EmployeeDto(345L, "John", "Doe", "jdoe@me.com");
         Employee employee = new Employee(345L, "John", "Doe", "jdoe@me.com");
         Employee savedEmployee = new Employee(345L, "John", "Doe", "jdoe@me.com");
 
         //Mock the calls
-        Mockito.when(employeeMapper.mapToEmployee(employeeDto)).thenReturn(employee);
-        Mockito.when(employeeRepository.save(employee)).thenReturn(savedEmployee);
-        Mockito.when(employeeMapper.mapToEmployeeDto(savedEmployee)).thenReturn(new EmployeeDto(345L, "John", "Doe", "jdoe@me.com"));
+        when(employeeMapper.mapToEmployee(employeeDto)).thenReturn(employee);
+        when(employeeRepository.save(employee)).thenReturn(savedEmployee);
+        when(employeeMapper.mapToEmployeeDto(savedEmployee)).thenReturn(employeeDto);
 
-        //when
+        //Act
         EmployeeDto createdEmployee = employeeService.createEmployee(employeeDto);
 
-        //then
-        assertEquals(employeeDto.getFirstName(), createdEmployee.getFirstName());
-        assertEquals(employeeDto.getLastName(), createdEmployee.getLastName());
-        assertEquals(employeeDto.getEmail(), createdEmployee.getEmail());
+        //Assert
+        assertEquals(employeeDto, createdEmployee);
 
-        verify(employeeMapper, times(1)).mapToEmployee(employeeDto);
-        verify(employeeRepository, times(1)).save(employee);
-        verify(employeeMapper, times(1)).mapToEmployeeDto(savedEmployee);
+        verify(employeeMapper).mapToEmployee(employeeDto);
+        verify(employeeRepository).save(employee);
+        verify(employeeMapper).mapToEmployeeDto(savedEmployee);
     }
 
     @Test
     void getEmployeeById() {
-        //given
+        //Arrange
         Long employeeId = 345L;
         Employee employee = new Employee(
                 345L,
@@ -74,82 +74,81 @@ class EmployeeServiceTest {
                 345L, "John", "Doe", "jdoe@me.com"
         ));
 
-        //when
+        //Act
         EmployeeDto employeeDto = employeeService.getEmployeeById(employeeId);
 
-        //then
+        //Assert
         assertEquals(employee.getFirstName(), employeeDto.getFirstName());
         assertEquals(employee.getLastName(), employeeDto.getLastName());
-        assertEquals(employee.getEmail(),employeeDto.getEmail());
+        assertEquals(employee.getEmail(), employeeDto.getEmail());
 
-        verify(employeeRepository,times(1)).findById(employeeId);
+        verify(employeeRepository, times(1)).findById(employeeId);
     }
 
     @Test
     void getAllEmployees() {
-        //given
-        List<Employee> employees = new ArrayList<>();
-        employees.add(new Employee(345L, "John", "Doe", "jdoe@me.com"));
+        //Arrange
+        List<Employee> employees = Collections.singletonList(new Employee(345L, "John", "Doe", "jdoe@me.com"));
 
         //Mock the calls
         when(employeeRepository.findAll()).thenReturn(employees);
-        when(employeeMapper.mapToEmployeeDto(any(Employee.class))).thenReturn(new EmployeeDto(
-                345L, "John", "Doe", "jdoe@me.com"
-        ));
+        when(employeeMapper.mapToEmployeeDto(any(Employee.class))).thenReturn(new EmployeeDto(345L, "John", "Doe", "jdoe@me.com"));
 
-        //when
+        //Act
         List<EmployeeDto> employeeDtos = employeeService.getAllEmployees();
 
-        //then
-        assertEquals(employees.size(), employeeDtos.size());
+        //Assert
+        assertEquals(employees.stream().map(employeeMapper::mapToEmployeeDto).collect(Collectors.toList()), employeeDtos);
 
-        verify(employeeRepository, times(1)).findAll();
+        verify(employeeRepository).findAll();
     }
 
     @Test
     public void testUpdateEmployee() {
-        // Given
+        // Arrange
         Long employeeId = 345L;
-        EmployeeDto updatedEmployeeDto = new EmployeeDto(employeeId, "John", "Doe", "jdoe@me.com");
+
+        // Create a separate DTO for expected values to avoid comparing references
+        EmployeeDto expectedUpdatedEmployeeDto = new EmployeeDto(employeeId, "John", "Doe", "jdoe@me.com");
         Employee existingEmployee = new Employee(employeeId, "Jane", "Doe", "janedoe@me.com");
+        Employee updatedEmployee = new Employee(employeeId, "John", "Doe", "jdoe@me.com");
+        EmployeeDto UpdatedEmployeeDto = new EmployeeDto(employeeId, "John", "Doe", "jdoe@me.com");
 
         // Mock repository behavior
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
-        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(employeeMapper.mapToEmployeeDto(any(Employee.class))).thenAnswer(invocation -> {
-            Employee employee = invocation.getArgument(0);
-            return new EmployeeDto(employee.getId(), employee.getFirstName(), employee.getLastName(), employee.getEmail());
-        });
+        when(employeeRepository.save(any(Employee.class))).thenReturn(updatedEmployee);
+        when(employeeMapper.mapToEmployeeDto(updatedEmployee)).thenReturn(UpdatedEmployeeDto);
 
-        // When
-        EmployeeDto updatedEmployee = employeeService.updateEmployee(employeeId, updatedEmployeeDto);
+        // Act
+        EmployeeDto returnedEmployeeDto = employeeService.updateEmployee(employeeId, expectedUpdatedEmployeeDto);
 
-        // Then
-        assertEquals(updatedEmployeeDto.getFirstName(), updatedEmployee.getFirstName());
-        assertEquals(updatedEmployeeDto.getLastName(), updatedEmployee.getLastName());
-        assertEquals(updatedEmployeeDto.getEmail(), updatedEmployee.getEmail());
+        // Assert
+        assertNotNull(returnedEmployeeDto);
+        assertEquals(expectedUpdatedEmployeeDto.getFirstName(), returnedEmployeeDto.getFirstName());
+        assertEquals(expectedUpdatedEmployeeDto.getLastName(), returnedEmployeeDto.getLastName());
+        assertEquals(expectedUpdatedEmployeeDto.getEmail(), returnedEmployeeDto.getEmail());
 
-        verify(employeeRepository, times(1)).findById(employeeId);
-        verify(employeeRepository, times(1)).save(any(Employee.class));
-        verify(employeeMapper, times(1)).mapToEmployeeDto(any(Employee.class));
+        verify(employeeRepository).findById(employeeId);
+        verify(employeeRepository).save(updatedEmployee);
     }
 
     @Test
     public void testDeleteEmployee() {
-        // given
+        //Arrange
         Long employeeId = 456L;
+        Employee employee = new Employee();
 
-        // mock calls
-        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(new Employee()));
+        // Mock repository behavior
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
 
-        // when
+        //Act
         employeeService.deleteEmployee(employeeId);
 
         // then
         // No assertions needed as the method doesn't return a value
 
-        // verify interactions
-        verify(employeeRepository, times(1)).findById(employeeId);
-        verify(employeeRepository, times(1)).deleteById(employeeId);
+        //Verify that the repository methods were called with the correct parameters
+        verify(employeeRepository).findById(employeeId);
+        verify(employeeRepository).deleteById(employeeId);
     }
 }
