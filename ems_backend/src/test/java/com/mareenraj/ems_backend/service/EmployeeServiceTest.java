@@ -151,4 +151,28 @@ class EmployeeServiceTest {
         verify(employeeRepository).findById(employeeId);
         verify(employeeRepository).deleteById(employeeId);
     }
+
+    @Test
+    public void testGetEmployeeByEmail() {
+        // Arrange
+        String email = "johndoe@me.com";
+        Employee employee = new Employee(1L, "John", "Doe", email);
+        EmployeeDto employeeDto = new EmployeeDto(1L, "John", "Doe", email);
+
+        // Mock the calls
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(employeeMapper.mapToEmployeeDto(employee)).thenReturn(employeeDto);
+
+        // Act
+        EmployeeDto returnedEmployeeDto = employeeService.getEmployeeByEmail(email);
+
+        // Assert
+        assertNotNull(returnedEmployeeDto); // Ensure that the returnedEmployeeDto is not null
+        assertEquals(employee.getId(), returnedEmployeeDto.getId());
+        assertEquals(employee.getFirstName(), returnedEmployeeDto.getFirstName());
+        assertEquals(employee.getLastName(), returnedEmployeeDto.getLastName());
+        assertEquals(employee.getEmail(), returnedEmployeeDto.getEmail());
+
+        verify(employeeRepository).findByEmail(email);
+    }
 }
