@@ -3,7 +3,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/ems
     username: postgres
     password: "*Mareen7#"
-    driver-class-name: 
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update

@@ -7,9 +7,11 @@ import com.mareenraj.ems_backend.repository.EmployeeRepository;
 import com.mareenraj.ems_backend.service.impl.EmployeeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
     @InjectMocks
     private EmployeeServiceImpl employeeService;
@@ -28,11 +31,6 @@ class EmployeeServiceTest {
     private EmployeeRepository employeeRepository;
     @Mock
     private EmployeeMapper employeeMapper;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void createEmployee() {
