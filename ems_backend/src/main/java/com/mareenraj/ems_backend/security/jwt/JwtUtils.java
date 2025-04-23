@@ -20,11 +20,14 @@ public class JwtUtils {
     @Value("${app.jwt-expiration-ms}")
     private int jwtExpirationMs;
 
+    @Value("${app.jwt-refresh-expiration-ms}")
+    private int jwtRefreshExpirationMs;
+
     private Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public String generateToken(String userName) {
+    public String generateAccessToken(String userName) {
         Date now = new Date();
         Date expiryAt = new Date(now.getTime() + jwtExpirationMs);
 
@@ -32,6 +35,16 @@ public class JwtUtils {
                 .subject(userName)
                 .issuedAt(now)
                 .expiration(expiryAt)
+                .signWith(key())
+                .compact();
+    }
+
+    public String generateRefreshToken(String username) {
+        Date now = new Date();
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + jwtRefreshExpirationMs))
                 .signWith(key())
                 .compact();
     }

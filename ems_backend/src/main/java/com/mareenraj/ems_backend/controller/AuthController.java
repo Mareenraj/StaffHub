@@ -4,11 +4,13 @@ import com.mareenraj.ems_backend.dto.JwtResponse;
 import com.mareenraj.ems_backend.dto.LoginRequest;
 import com.mareenraj.ems_backend.dto.MessageResponse;
 import com.mareenraj.ems_backend.dto.SignupRequest;
+import com.mareenraj.ems_backend.model.RefreshToken;
 import com.mareenraj.ems_backend.model.Role;
 import com.mareenraj.ems_backend.model.User;
 import com.mareenraj.ems_backend.repository.RoleRepository;
 import com.mareenraj.ems_backend.repository.UserRepository;
 import com.mareenraj.ems_backend.security.jwt.JwtUtils;
+import com.mareenraj.ems_backend.security.service.RefreshTokenService;
 import com.mareenraj.ems_backend.security.service.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -33,39 +35,54 @@ public class AuthController {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthController(
             AuthenticationManager authenticationManager,
             UserRepository userRepository,
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
-            JwtUtils jwtUtils) {
+            JwtUtils jwtUtils, RefreshTokenService refreshTokenService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(),
+                        loginRequest.getPassword()
+                )
+        );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateToken(loginRequest.getUsername());
+
+        String accessToken = jwtUtils.generateAccessToken(loginRequest.getUsername());
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        RefreshToken refreshToken =
+                refreshTokenService.createRefreshToken(userDetails.getUsername());
+
         List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority().substring(5)) // Remove the "ROLE_" prefix
+                .map(granted -> granted.getAuthority().substring(5)) // drop "ROLE_"
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+        return ResponseEntity.ok(
+                new JwtResponse(
+                        accessToken,
+                        refreshToken.getToken(),
+                        userDetails.getId(),
+                        userDetails.getUsername(),
+                        userDetails.getEmail(),
+                        roles
+                )
+        );
     }
+
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
