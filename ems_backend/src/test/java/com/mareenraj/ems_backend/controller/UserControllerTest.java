@@ -1,15 +1,12 @@
 package com.mareenraj.ems_backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mareenraj.ems_backend.dto.EmployeeDto;
-import com.mareenraj.ems_backend.service.EmployeeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -23,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = EmployeeController.class)
 @ExtendWith(MockitoExtension.class)
-class EmployeeControllerTest {
+class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

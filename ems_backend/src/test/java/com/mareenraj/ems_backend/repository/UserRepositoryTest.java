@@ -1,6 +1,6 @@
 package com.mareenraj.ems_backend.repository;
 
-import com.mareenraj.ems_backend.model.Employee;
+import com.mareenraj.ems_backend.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class EmployeeRepositoryTest {
+class UserRepositoryTest {
 
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -20,123 +20,123 @@ class EmployeeRepositoryTest {
     @Test
     public void employeeRepository_save_returnSavedEmployeeTest() {
         //Arrange
-        Employee employee = Employee.builder()
+        User user = User.builder()
                 .firstName("Mareen")
                 .lastName("Raj")
                 .email("N6OJt@example.com")
                 .build();
 
         //Act
-        Employee savedEmployee = employeeRepository.save(employee);
+        User savedUser = employeeRepository.save(user);
 
         //Assert
-        assertThat(savedEmployee).isNotNull();
-        assertThat(savedEmployee.getId()).isGreaterThan(0L);
+        assertThat(savedUser).isNotNull();
+        assertThat(savedUser.getId()).isGreaterThan(0L);
     }
 
     @Test
     public void employeeRepository_getAll_returnAllEmployeesTest() {
         //Arrange
-        Employee employee1 = Employee.builder()
+        User user1 = User.builder()
                 .firstName("Mareen")
                 .lastName("Raj")
                 .email("N6OJt@example.com")
                 .build();
 
-        Employee employee2 = Employee.builder()
+        User user2 = User.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("jdoe@me.com")
                 .build();
 
-        employeeRepository.save(employee1);
-        employeeRepository.save(employee2);
+        employeeRepository.save(user1);
+        employeeRepository.save(user2);
 
         //Act
-        List<Employee> employeeList = employeeRepository.findAll();
+        List<User> userList = employeeRepository.findAll();
 
         //Assert
-        assertThat(employeeList).isNotNull();
-        assertThat(employeeList.size()).isGreaterThanOrEqualTo(2);
+        assertThat(userList).isNotNull();
+        assertThat(userList.size()).isGreaterThanOrEqualTo(2);
     }
 
     @Test
     public void employeeRepository_getById_returnEmployeeByIdTest() {
 
         //Arrange
-        Employee employee = Employee.builder()
+        User user = User.builder()
                 .firstName("Chris")
                 .lastName("Robin")
                 .email("NkjnOJt@example.com")
                 .build();
-        employeeRepository.save(employee);
+        employeeRepository.save(user);
 
         //Act
-        Employee foundEmployee = employeeRepository.findById(employee.getId()).get();
+        User foundUser = employeeRepository.findById(user.getId()).get();
 
         //Assert
-        assertThat(foundEmployee).isNotNull();
-        assertThat(foundEmployee.getId()).isEqualTo(employee.getId());
+        assertThat(foundUser).isNotNull();
+        assertThat(foundUser.getId()).isEqualTo(user.getId());
     }
 
     @Test
     public void employeeRepository_getByEmail_returnEmployeeByEmailTest() {
 
         //Arrange
-        Employee employee = Employee.builder()
+        User user = User.builder()
                 .firstName("Chris")
                 .lastName("Robin")
                 .email("NkjnOJt@example.com")
                 .build();
-        employeeRepository.save(employee);
+        employeeRepository.save(user);
 
         //Act
-        Employee foundEmployee = employeeRepository.findByEmail(employee.getEmail()).get();
+        User foundUser = employeeRepository.findByEmail(user.getEmail()).get();
 
         //Assert
-        assertThat(foundEmployee).isNotNull();
-        assertThat(foundEmployee.getEmail()).isEqualTo(employee.getEmail());
+        assertThat(foundUser).isNotNull();
+        assertThat(foundUser.getEmail()).isEqualTo(user.getEmail());
     }
 
     @Test
     public void employeeRepository_deleteById_deleteEmployeeByIdTest() {
         //Arrange
-        Employee employee = Employee.builder()
+        User user = User.builder()
                 .firstName("Chris")
                 .lastName("Robin")
                 .email("NkjnOJt@example.com")
                 .build();
-        Employee savedEmployee = employeeRepository.save(employee);
+        User savedUser = employeeRepository.save(user);
 
         //Act
-        employeeRepository.deleteById(savedEmployee.getId());
+        employeeRepository.deleteById(savedUser.getId());
 
         //Assert
-        Optional<Employee> deletedEmployee = employeeRepository.findById(savedEmployee.getId());
+        Optional<User> deletedEmployee = employeeRepository.findById(savedUser.getId());
         assertThat(deletedEmployee).isEmpty();
     }
 
     @Test
     public void employeeRepository_updateById_updateEmployeeByIdTest() {
         //Arrange
-        Employee employee = Employee.builder()
+        User user = User.builder()
                 .firstName("Mahil")
                 .lastName("Robin")
                 .email("NkjnOmahilJt@example.com")
                 .build();
-        Employee savedEmployee = employeeRepository.save(employee);
+        User savedUser = employeeRepository.save(user);
 
         //Act
-        savedEmployee.setId(savedEmployee.getId());
-        savedEmployee.setFirstName("Mareen");
-        savedEmployee.setLastName("Raj");
-        savedEmployee.setEmail("N6OJt@example.com");
-        Employee updatedEmployee = employeeRepository.save(savedEmployee);
+        savedUser.setId(savedUser.getId());
+        savedUser.setFirstName("Mareen");
+        savedUser.setLastName("Raj");
+        savedUser.setEmail("N6OJt@example.com");
+        User updatedUser = employeeRepository.save(savedUser);
 
         //Assert
-        assertThat(updatedEmployee).isNotNull();
-        assertThat(updatedEmployee.getFirstName()).isEqualTo("Mareen");
-        assertThat(updatedEmployee.getLastName()).isEqualTo("Raj");
-        assertThat(updatedEmployee.getEmail()).isEqualTo("N6OJt@example.com");
+        assertThat(updatedUser).isNotNull();
+        assertThat(updatedUser.getFirstName()).isEqualTo("Mareen");
+        assertThat(updatedUser.getLastName()).isEqualTo("Raj");
+        assertThat(updatedUser.getEmail()).isEqualTo("N6OJt@example.com");
     }
 }

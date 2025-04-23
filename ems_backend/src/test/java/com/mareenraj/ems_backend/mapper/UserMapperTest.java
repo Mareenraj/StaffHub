@@ -1,13 +1,12 @@
 package com.mareenraj.ems_backend.mapper;
 
-import com.mareenraj.ems_backend.dto.EmployeeDto;
-import com.mareenraj.ems_backend.model.Employee;
+import com.mareenraj.ems_backend.model.User;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-class EmployeeMapperTest {
+class UserMapperTest {
     EmployeeMapper employeeMapper;
 
     @BeforeEach
@@ -17,23 +16,23 @@ class EmployeeMapperTest {
 
     @Test
     void mapToEmployeeDto() {
-        Employee employee = new Employee(777L, "Mareen", "raj", "j4D5H@example.com");
-        EmployeeDto employeeDto = employeeMapper.mapToEmployeeDto(employee);
-        assertEquals(employee.getId(), employeeDto.getId());
-        assertEquals(employee.getFirstName(), employeeDto.getFirstName());
-        assertEquals(employee.getLastName(), employeeDto.getLastName());
-        assertEquals(employee.getEmail(), employeeDto.getEmail());
+        User user = new User(777L, "Mareen", "raj", "j4D5H@example.com");
+        EmployeeDto employeeDto = employeeMapper.mapToEmployeeDto(user);
+        assertEquals(user.getId(), employeeDto.getId());
+        assertEquals(user.getFirstName(), employeeDto.getFirstName());
+        assertEquals(user.getLastName(), employeeDto.getLastName());
+        assertEquals(user.getEmail(), employeeDto.getEmail());
 
     }
 
     @Test
     void mapToEmployee() {
         EmployeeDto employeeDto = new EmployeeDto(777L, "Mareen", "raj", "j4D5H@example.com");
-        Employee employee = employeeMapper.mapToEmployee(employeeDto);
-        assertEquals(employee.getId(), employeeDto.getId());
-        assertEquals(employee.getFirstName(), employeeDto.getFirstName());
-        assertEquals(employee.getLastName(), employeeDto.getLastName());
-        assertEquals(employee.getEmail(), employeeDto.getEmail());
+        User user = employeeMapper.mapToEmployee(employeeDto);
+        assertEquals(user.getId(), employeeDto.getId());
+        assertEquals(user.getFirstName(), employeeDto.getFirstName());
+        assertEquals(user.getLastName(), employeeDto.getLastName());
+        assertEquals(user.getEmail(), employeeDto.getEmail());
     }
 
     @Test
