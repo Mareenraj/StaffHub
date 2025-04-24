@@ -1,6 +1,10 @@
 // WebSecurityConfig.java
 package com.mareenraj.ems_backend.security;
 
+import com.mareenraj.ems_backend.security.jwt.JwtAuthEntryPoint;
+import com.mareenraj.ems_backend.security.jwt.JwtAuthenticationFilter;
+import com.mareenraj.ems_backend.security.service.TokenBlacklistService;
+import com.mareenraj.ems_backend.security.service.UserDetailsServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,11 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-
-import com.mareenraj.ems_backend.security.jwt.JwtAuthEntryPoint;
-import com.mareenraj.ems_backend.security.jwt.JwtAuthenticationFilter;
-import com.mareenraj.ems_backend.security.service.TokenBlacklistService;
-import com.mareenraj.ems_backend.security.service.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
