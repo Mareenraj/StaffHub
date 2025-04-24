@@ -1,9 +1,6 @@
 package com.mareenraj.ems_backend.controller;
 
-import com.mareenraj.ems_backend.dto.JwtResponse;
-import com.mareenraj.ems_backend.dto.LoginRequest;
-import com.mareenraj.ems_backend.dto.MessageResponse;
-import com.mareenraj.ems_backend.dto.SignupRequest;
+import com.mareenraj.ems_backend.dto.*;
 import com.mareenraj.ems_backend.model.EmailVerificationToken;
 import com.mareenraj.ems_backend.model.RefreshToken;
 import com.mareenraj.ems_backend.model.Role;
@@ -228,6 +225,18 @@ public class AuthController {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Invalid credentials"));
+        }
+    }
+
+    @PostMapping("/signout")
+    public ResponseEntity<?> logoutUser(@Valid @RequestBody LogoutRequest logoutRequest) {
+        try {
+            refreshTokenService.deleteByToken(logoutRequest.getRefreshToken());
+            return ResponseEntity.ok(new MessageResponse("Logout successful"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Invalid refresh token"));
         }
     }
 }
