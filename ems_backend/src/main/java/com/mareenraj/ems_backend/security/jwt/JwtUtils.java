@@ -39,22 +39,10 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String generateRefreshToken(String username) {
-        Date now = new Date();
-        return Jwts.builder()
-                .subject(username)
-                .issuedAt(now)
-                .expiration(new Date(now.getTime() + jwtRefreshExpirationMs))
-                .signWith(key())
-                .compact();
-    }
-
-
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    // Extract claim from token
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = Jwts.parser()
                 .setSigningKey(key())

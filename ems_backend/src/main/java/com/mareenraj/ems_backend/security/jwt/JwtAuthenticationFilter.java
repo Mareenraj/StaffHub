@@ -1,7 +1,6 @@
 // JwtAuthenticationFilter.java
 package com.mareenraj.ems_backend.security.jwt;
 
-import com.mareenraj.ems_backend.security.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,14 +20,12 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
-    private final TokenBlacklistService tokenBlacklistService;
 
     public JwtAuthenticationFilter(JwtUtils jwtUtils,
-                                   UserDetailsService userDetailsService,
-                                   TokenBlacklistService tokenBlacklistService) {
+                                   UserDetailsService userDetailsService
+    ) {
         this.jwtUtils = jwtUtils;
         this.userDetailsService = userDetailsService;
-        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
@@ -38,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
-            if (jwt != null && !tokenBlacklistService.isTokenBlacklisted(jwt)) {
+            if (jwt != null) {
                 String username = jwtUtils.getUsernameFromToken(jwt);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);

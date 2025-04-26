@@ -4,6 +4,7 @@ import com.mareenraj.ems_backend.model.RefreshToken;
 import com.mareenraj.ems_backend.model.User;
 import com.mareenraj.ems_backend.repository.RefreshTokenRepository;
 import com.mareenraj.ems_backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 
 @Service
 public class RefreshTokenService {
-    @Value("${app.jwt-refresh-expiration-ms}")
+    @Value("${app.refresh-expiration-ms}")
     private long refreshDurationMs;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
@@ -22,9 +23,10 @@ public class RefreshTokenService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public RefreshToken createRefreshToken(String username) {
         User user = userRepository.findByUserName(username)
-                .orElseThrow();
+                .orElseThrow(()-> new RuntimeException("User not found!"));
         RefreshToken rt = new RefreshToken();
         rt.setUser(user);
         rt.setExpiryDate(new Date(System.currentTimeMillis() + refreshDurationMs));
@@ -40,10 +42,12 @@ public class RefreshTokenService {
         return token;
     }
 
+    @Transactional
     public void deleteByUser(User user) {
         refreshTokenRepository.deleteByUser(user);
     }
 
+    @Transactional
     public void deleteByToken(String token) {
         refreshTokenRepository.findByToken(token).ifPresent(refreshTokenRepository::delete);
     }

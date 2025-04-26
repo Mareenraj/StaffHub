@@ -14,10 +14,8 @@ import com.mareenraj.ems_backend.security.service.RefreshTokenService;
 import com.mareenraj.ems_backend.security.service.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,7 +28,6 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
-@EnableAsync
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
@@ -57,8 +54,8 @@ public class AuthController {
         this.emailService = emailService;
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody SignupRequest signupRequest) {
         if (userRepository.existsByUserName(signupRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
@@ -112,7 +109,6 @@ public class AuthController {
                     .internalServerError()
                     .body(new MessageResponse("Error: Could not send verification email"));
         }
-
         return ResponseEntity.ok(
                 new MessageResponse("User registered successfully! Please check your email for verification instructions")
         );
@@ -136,7 +132,7 @@ public class AuthController {
 
     private Date calculateExpiryDate() {
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.HOUR, 24); // 24 hours expiration
+        cal.add(Calendar.HOUR, 24);
         return cal.getTime();
     }
 
@@ -169,18 +165,23 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Account is already verified"));
         }
 
-        // Delete existing tokens
         emailVerificationTokenRepository.deleteByUser(user);
 
-        // Generate new token
-        String verificationToken = generateVerificationToken(user);
-        String verificationUrl = "http://staffhub/api/auth/verify?token=" + verificationToken;
-        emailService.sendVerificationEmail(user, verificationUrl);
+        try {
+            String verificationToken = generateVerificationToken(user);
+            String verificationUrl = "http://staffhub/api/auth/verify?token=" + verificationToken;
+            emailService.sendVerificationEmail(user, verificationUrl);
+        } catch (Exception e) {
+            userRepository.delete(user);
+            return ResponseEntity
+                    .internalServerError()
+                    .body(new MessageResponse("Error: Could not send verification email"));
+        }
 
         return ResponseEntity.ok(new MessageResponse("Verification email resent successfully"));
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -203,7 +204,7 @@ public class AuthController {
                     refreshTokenService.createRefreshToken(userDetails.getUsername());
 
             List<String> roles = userDetails.getAuthorities().stream()
-                    .map(granted -> granted.getAuthority().substring(5)) // drop "ROLE_"
+                    .map(granted -> granted.getAuthority().substring(5))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(
@@ -217,10 +218,6 @@ public class AuthController {
                     )
             );
 
-        } catch (DisabledException e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Account not verified - Please check your email"));
         } catch (Exception e) {
             return ResponseEntity
                     .badRequest()
@@ -228,15 +225,16 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/signout")
+    @PostMapping("/logout")
     public ResponseEntity<?> logoutUser(@Valid @RequestBody LogoutRequest logoutRequest) {
         try {
             refreshTokenService.deleteByToken(logoutRequest.getRefreshToken());
-            return ResponseEntity.ok(new MessageResponse("Logout successful"));
         } catch (Exception e) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Invalid refresh token"));
         }
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok(new MessageResponse("Logout successful"));
     }
 }

@@ -18,7 +18,6 @@ public class EmailService {
     public void sendVerificationEmail(User user, String verificationUrl) {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
-
         try {
             helper.setTo(user.getEmail());
             helper.setSubject("Account Verification");
